@@ -97,6 +97,9 @@ files:
         }
     }
   learner_created: false
+- name: src/carsharing/db/carsharing.mv.db.mv.db
+  visible: true
+  learner_created: true
 - name: test/CarSharingTest.java
   visible: false
   text: |
@@ -203,6 +206,12 @@ files:
         }
     }
   learner_created: false
+- name: src/carsharing/db/CompanyRepository.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/Company.java
+  visible: true
+  learner_created: true
 - name: src/carsharing/Main.java
   visible: true
   text: |-
@@ -215,10 +224,49 @@ files:
         }
     }
   learner_created: false
-- name: src/carsharing/db/carsharing.mv.db.mv.db
+- name: src/carsharing/db/Database.java
   visible: true
   learner_created: true
-- name: src/carsharing/db/Database.java
+- name: src/carsharing/db/JDBCCompanyRepository.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/tool/DBMTool.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/tool/ContextMenu.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/tool/MainMenu.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/tool/Action.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/tool/TerminateAction.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/tool/SwitchContextMenuAction.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/tool/ManagerMenu.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/tool/AbstractContextMenu.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/CompanyService.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/CompanyServiceImpl.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/tool/CreateCompanyAction.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/tool/ListCompanyAction.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/DependencyManager.java
   visible: true
   learner_created: true
 feedback_link: https://hyperskill.org/projects/140/stages/758/implement#comment
@@ -226,4 +274,4 @@ status: Solved
 feedback:
   message: Congratulations!
   time: Wed, 29 Jun 2022 06:25:25 UTC
-record: -1
+record: 1

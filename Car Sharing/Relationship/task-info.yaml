@@ -555,6 +555,465 @@ files:
         }
     }
   learner_created: false
+- name: src/carsharing/db/CompanyRepository.java
+  visible: true
+  text: |
+    package carsharing.db;
+
+    import carsharing.Company;
+
+    import java.sql.SQLException;
+    import java.util.List;
+
+    public interface CompanyRepository {
+        void add(String companyName) throws SQLException;
+        List<Company> getAll() throws SQLException;
+    }
+  learner_created: true
+- name: src/carsharing/Company.java
+  visible: true
+  text: |
+    package carsharing;
+
+    public class Company {
+        private final int id;
+        private final String name;
+
+        public Company(int id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
+  learner_created: true
+- name: src/carsharing/tool/ContextMenu.java
+  visible: true
+  text: |
+    package carsharing.tool;
+
+    public interface ContextMenu {
+        void display();
+        void readInput();
+        void performAction(DBMTool dbmTool);
+    }
+  learner_created: true
+- name: src/carsharing/tool/TerminateAction.java
+  visible: true
+  text: |
+    package carsharing.tool;
+
+    public class TerminateAction implements Action {
+        @Override
+        public void perform(DBMTool dbmTool) {
+            dbmTool.terminate();
+        }
+    }
+  learner_created: true
+- name: src/carsharing/tool/DBMTool.java
+  visible: true
+  text: |
+    package carsharing.tool;
+
+    public class DBMTool implements Runnable {
+        private ContextMenu contextMenu;
+        private boolean shouldTerminate;
+
+        public DBMTool(ContextMenu contextMenu) {
+            this.contextMenu = contextMenu;
+        }
+
+        @Override
+        public void run() {
+            while (!shouldTerminate) {
+                contextMenu.display();
+                contextMenu.readInput();
+                contextMenu.performAction(this);
+            }
+        }
+
+        void switchContext(ContextMenu contextMenu) {
+            this.contextMenu = contextMenu;
+        }
+
+        void terminate() {
+            shouldTerminate = true;
+        }
+    }
+  learner_created: true
+- name: src/carsharing/tool/ListCompanyAction.java
+  visible: true
+  text: |
+    package carsharing.tool;
+
+    import carsharing.Company;
+    import carsharing.CompanyService;
+
+    import java.util.List;
+
+    public class ListCompanyAction implements Action {
+        private final CompanyService companyService;
+
+        public ListCompanyAction(CompanyService companyService) {
+            this.companyService = companyService;
+        }
+
+        @Override
+        public void perform(DBMTool dbmTool) {
+            final List<Company> companies = companyService.getAll();
+            if (companies.isEmpty()) {
+                System.out.println("The company list is empty!");
+            } else {
+                System.out.println("Company list:");
+                for (int i = 1; i <= companies.size(); i++) {
+                    Company company = companies.get(i - 1);
+                    System.out.printf("%d. %s%n", i, company.getName());
+                }
+                System.out.println();
+            }
+        }
+    }
+  learner_created: true
+- name: src/carsharing/tool/Action.java
+  visible: true
+  text: |
+    package carsharing.tool;
+
+    public interface Action {
+        void perform(DBMTool dbmTool);
+    }
+  learner_created: true
+- name: src/carsharing/tool/MainMenu.java
+  visible: true
+  text: |
+    package carsharing.tool;
+
+    import java.util.Map;
+
+    public class MainMenu extends AbstractContextMenu implements ContextMenu{
+
+        public MainMenu(String displayText, Map<Integer, Action> actionMap) {
+            super(displayText,actionMap);
+        }
+    }
+  learner_created: true
+- name: src/carsharing/tool/SwitchContextMenuAction.java
+  visible: true
+  text: |
+    package carsharing.tool;
+
+    public class SwitchContextMenuAction implements Action {
+        private final ContextMenu nextContextMenu;
+
+        public SwitchContextMenuAction(ContextMenu nextContextMenu) {
+            this.nextContextMenu = nextContextMenu;
+        }
+
+        @Override
+        public void perform(DBMTool dbmTool) {
+            dbmTool.switchContext(nextContextMenu);
+        }
+    }
+  learner_created: true
+- name: src/carsharing/db/Database.java
+  visible: true
+  text: |
+    package carsharing.db;
+
+    import java.sql.Connection;
+    import java.sql.DriverManager;
+    import java.sql.SQLException;
+    import java.sql.Statement;
+
+    public class Database {
+        private static final String JDBC_DRIVER = "org.h2.Driver";
+        private static final String DB_URL = "jdbc:h2:./src/carsharing/db/";
+        private static Database INSTANCE;
+        private final String dbFileName;
+
+        private Database(String dbFileName) {
+            this.dbFileName = dbFileName;
+        }
+
+        public static Database getInstance(String dbFileName) {
+            if (INSTANCE == null) {
+                INSTANCE = new Database(dbFileName);
+            }
+            return INSTANCE;
+        }
+
+        public static Database getInstance() {
+            return INSTANCE;
+        }
+
+        public void initialize() throws ClassNotFoundException {
+            Class.forName(JDBC_DRIVER);
+            try (Connection connection =
+                         getConnection();
+                 Statement statement = connection.createStatement()) {
+                connection.setAutoCommit(true);
+                final String COMPANY_DDL = "CREATE TABLE IF NOT EXISTS " +
+                        "COMPANY(" +
+                        "ID INTEGER PRIMARY KEY AUTO_INCREMENT, " +
+                        "NAME VARCHAR(30) UNIQUE NOT NULL )";
+                statement.executeUpdate(COMPANY_DDL);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        public Connection getConnection() throws SQLException {
+            return DriverManager.getConnection(DB_URL + dbFileName);
+        }
+    }
+  learner_created: true
+- name: src/carsharing/DependencyManager.java
+  visible: true
+  text: |
+    package carsharing;
+
+    import carsharing.db.CompanyRepository;
+    import carsharing.db.JDBCCompanyRepository;
+    import carsharing.tool.*;
+
+    import java.util.HashMap;
+    import java.util.Map;
+
+    public class DependencyManager {
+        private DBMTool dbmTool;
+        private ContextMenu mainMenu;
+        private ContextMenu managerMenu;
+        private CompanyRepository companyRepository;
+        private CompanyService companyService;
+
+        public void wireDependencies() {
+            companyRepository = JDBCCompanyRepository.getInstance();
+            companyService = new CompanyServiceImpl(companyRepository);
+            Action createCompanyAction = new CreateCompanyAction(companyService);
+            Action listCompanyAction = new ListCompanyAction(companyService);
+            final String mainMenuDisplayText = "1. Log in as a manager\n" +
+                    "0. Exit";
+            final Map<Integer, Action> mainMenuActionMap = new HashMap<>();
+            mainMenu = new MainMenu(mainMenuDisplayText, mainMenuActionMap);
+
+            Action backAction = new SwitchContextMenuAction(mainMenu);
+            final Map<Integer, Action> managerMenuActionMap = new HashMap<>();
+            managerMenuActionMap.put(1, listCompanyAction);
+            managerMenuActionMap.put(2, createCompanyAction);
+            managerMenuActionMap.put(0, backAction);
+
+            final String managerMenuDisplayText = "1. Company list\n" +
+                    "2. Create a company\n" +
+                    "0. Back";
+            managerMenu = new ManagerMenu(managerMenuDisplayText, managerMenuActionMap);
+            Action managerLoginAction = new SwitchContextMenuAction(managerMenu);
+            Action terminateAction = new TerminateAction();
+            mainMenuActionMap.put(1, managerLoginAction);
+            mainMenuActionMap.put(0, terminateAction);
+            dbmTool = new DBMTool(mainMenu);
+        }
+
+        public DBMTool getDbmTool() {
+            return dbmTool;
+        }
+
+        public ContextMenu getMainMenu() {
+            return mainMenu;
+        }
+
+        public ContextMenu getManagerMenu() {
+            return managerMenu;
+        }
+
+        public CompanyRepository getCompanyRepository() {
+            return companyRepository;
+        }
+
+        public CompanyService getCompanyService() {
+            return companyService;
+        }
+    }
+  learner_created: true
+- name: src/carsharing/tool/ManagerMenu.java
+  visible: true
+  text: |
+    package carsharing.tool;
+
+    import java.util.Map;
+
+    public class ManagerMenu extends AbstractContextMenu implements ContextMenu {
+        public ManagerMenu(String displayText, Map<Integer, Action> actionMap) {
+            super(displayText, actionMap);
+        }
+    }
+  learner_created: true
+- name: src/carsharing/tool/CreateCompanyAction.java
+  visible: true
+  text: |
+    package carsharing.tool;
+
+    import carsharing.CompanyService;
+
+    import java.util.Scanner;
+
+    public class CreateCompanyAction implements Action {
+        private final CompanyService companyService;
+
+        public CreateCompanyAction(CompanyService companyService) {
+            this.companyService = companyService;
+        }
+
+        @Override
+        public void perform(DBMTool dbmTool) {
+            System.out.println("Enter the company name:");
+            Scanner scanner = new Scanner(System.in);
+            final String companyName = scanner.nextLine();
+            companyService.add(companyName);
+            System.out.println("The company was created!");
+        }
+    }
+  learner_created: true
+- name: src/carsharing/CompanyService.java
+  visible: true
+  text: |
+    package carsharing;
+
+    import java.util.List;
+
+    public interface CompanyService {
+        void add(String companyName);
+        List<Company> getAll();
+    }
+  learner_created: true
+- name: src/carsharing/tool/AbstractContextMenu.java
+  visible: true
+  text: |
+    package carsharing.tool;
+
+    import java.util.Map;
+    import java.util.Scanner;
+
+    public abstract class AbstractContextMenu {
+        protected final String displayText;
+        protected final Map<Integer, Action> actionMap;
+        protected Action currentAction;
+
+        public AbstractContextMenu(String displayText, Map<Integer, Action> actionMap) {
+            this.displayText = displayText;
+            this.actionMap = actionMap;
+        }
+
+        public void display() {
+            System.out.println(displayText);
+        }
+
+        public void readInput() {
+            Scanner scanner = new Scanner(System.in);
+            final int actionCode = scanner.nextInt();
+            currentAction = actionMap.get(actionCode);
+        }
+
+        public void performAction(DBMTool dbmTool) {
+            currentAction.perform(dbmTool);
+        }
+    }
+  learner_created: true
+- name: src/carsharing/db/JDBCCompanyRepository.java
+  visible: true
+  text: |
+    package carsharing.db;
+
+    import carsharing.Company;
+
+    import java.sql.Connection;
+    import java.sql.PreparedStatement;
+    import java.sql.ResultSet;
+    import java.sql.SQLException;
+    import java.util.ArrayList;
+    import java.util.List;
+
+    public class JDBCCompanyRepository implements CompanyRepository {
+        private static final JDBCCompanyRepository INSTANCE = new JDBCCompanyRepository();
+        private static final String INSERT_STATEMENT = "INSERT INTO COMPANY(NAME) VALUES (?)";
+        private static final String QUERY_FIND_ALL = "SELECT * from COMPANY";
+        private final Database database;
+
+        private JDBCCompanyRepository() {
+            database = Database.getInstance();
+        }
+
+        public static CompanyRepository getInstance() {
+            return INSTANCE;
+        }
+
+        @Override
+        public void add(String companyName) throws SQLException {
+            try (Connection connection = database.getConnection();
+                 final PreparedStatement statement = connection.prepareStatement(INSERT_STATEMENT)) {
+                statement.setString(1, companyName);
+                statement.executeUpdate();
+            }
+        }
+
+        @Override
+        public List<Company> getAll() throws SQLException {
+            List<Company> companies = new ArrayList<>();
+            try (Connection connection = database.getConnection();
+                 final PreparedStatement statement = connection.prepareStatement(QUERY_FIND_ALL);
+                 final ResultSet resultSet = statement.executeQuery();
+            ) {
+                while (resultSet.next()) {
+                    int id = resultSet.getInt("ID");
+                    String name = resultSet.getString("NAME");
+                    companies.add(new Company(id, name));
+                }
+            }
+            return companies;
+        }
+    }
+  learner_created: true
+- name: src/carsharing/CompanyServiceImpl.java
+  visible: true
+  text: |
+    package carsharing;
+
+    import carsharing.db.CompanyRepository;
+
+    import java.sql.SQLException;
+    import java.util.List;
+
+    public class CompanyServiceImpl implements CompanyService {
+        private final CompanyRepository companyRepository;
+
+        public CompanyServiceImpl(CompanyRepository companyRepository) {
+            this.companyRepository = companyRepository;
+        }
+
+        @Override
+        public void add(String companyName) {
+            try {
+                companyRepository.add(companyName);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public List<Company> getAll() {
+            try {
+                return companyRepository.getAll();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+  learner_created: true
 feedback_link: https://hyperskill.org/projects/140/stages/760/implement#comment
 status: Unchecked
 record: -1

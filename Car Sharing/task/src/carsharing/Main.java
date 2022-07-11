@@ -1,6 +1,7 @@
 package carsharing;
 
 import carsharing.db.Database;
+import carsharing.tool.DBMTool;
 
 public class Main {
     public static void main(String[] args) throws ClassNotFoundException {
@@ -10,6 +11,11 @@ public class Main {
                 dbFileName = args[1];
             }
         }
-        Database.initialize(dbFileName);
+        Database database = Database.getInstance(dbFileName);
+        database.initialize();
+        DependencyManager dependencyManager = new DependencyManager();
+        dependencyManager.wireDependencies();
+        DBMTool dbmTool = dependencyManager.getDbmTool();
+        dbmTool.run();
     }
 }
