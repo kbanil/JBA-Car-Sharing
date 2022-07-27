@@ -3,7 +3,7 @@ hyperskill_project:
   ide_files: https://stepik.org/media/attachments/lesson/440790/additional_files.json
   is_template_based: false
   use_ide: true
-update_date: Mon, 11 Jul 2022 06:10:42 UTC
+update_date: Wed, 27 Jul 2022 11:55:57 UTC
 stages:
 - id: 758
   step: 11501
@@ -13,7 +13,7 @@ stages:
   is_completed: true
 - id: 760
   step: 11503
-  is_completed: false
+  is_completed: true
 - id: 761
   step: 11504
   is_completed: false
@@ -139,6 +139,8 @@ topics:
     theory_id: 15090
   - title: Pseudocode basics
     theory_id: 19510
+  - title: Complex constructions in pseudocode
+    theory_id: 20922
   - title: Fixed-size array
     theory_id: 20078
   - title: Dynamic array
@@ -163,20 +165,20 @@ topics:
     theory_id: 3624
   - title: Lambda expressions
     theory_id: 11635
-  - title: Method references
-    theory_id: 3620
-  - title: Functional interfaces
-    theory_id: 11636
   - title: ArrayList
     theory_id: 3567
   - title: The List interface
     theory_id: 3581
+  - title: The Set interface
+    theory_id: 3575
+  - title: Method references
+    theory_id: 3620
+  - title: Functional interfaces
+    theory_id: 11636
   - title: Standard functional interfaces
     theory_id: 3623
   - title: Optional
     theory_id: 9699
-  - title: The Set interface
-    theory_id: 3575
   - title: Function composition
     theory_id: 3580
   - title: Comparator
@@ -258,14 +260,14 @@ topics:
     theory_id: 7400
   - title: Arithmetic expressions
     theory_id: 7409
-  - title: The NULL value
-    theory_id: 7907
   - title: Basic SELECT statement
     theory_id: 7392
   - title: SELECT FROM statement
     theory_id: 8611
   - title: Results ordering
     theory_id: 8627
+  - title: The NULL value
+    theory_id: 7907
   - title: Basic INSERT statement
     theory_id: 9059
   - title: Intro to MySQL

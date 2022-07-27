@@ -3,12 +3,12 @@ package carsharing.tool;
 import java.util.Map;
 import java.util.Scanner;
 
-public abstract class AbstractContextMenu {
+public class ContextMenuImpl implements ContextMenu{
     protected final String displayText;
     protected final Map<Integer, Action> actionMap;
     protected Action currentAction;
 
-    public AbstractContextMenu(String displayText, Map<Integer, Action> actionMap) {
+    public ContextMenuImpl(String displayText, Map<Integer, Action> actionMap) {
         this.displayText = displayText;
         this.actionMap = actionMap;
     }

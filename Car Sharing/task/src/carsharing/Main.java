@@ -13,8 +13,7 @@ public class Main {
         }
         Database database = Database.getInstance(dbFileName);
         database.initialize();
-        DependencyManager dependencyManager = new DependencyManager();
-        dependencyManager.wireDependencies();
+        DependencyManager dependencyManager = DependencyManager.getInstance();
         DBMTool dbmTool = dependencyManager.getDbmTool();
         dbmTool.run();
     }

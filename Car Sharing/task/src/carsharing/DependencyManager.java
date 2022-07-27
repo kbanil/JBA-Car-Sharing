@@ -13,6 +13,19 @@ public class DependencyManager {
     private ContextMenu managerMenu;
     private CompanyRepository companyRepository;
     private CompanyService companyService;
+    private static DependencyManager instance;
+
+    public static DependencyManager getInstance() {
+        if(instance == null) {
+            DependencyManager dm = new DependencyManager();
+            dm.wireDependencies();
+            instance = dm;
+        }
+        return instance;
+    }
+
+    private DependencyManager() {
+    }
 
     public void wireDependencies() {
         companyRepository = JDBCCompanyRepository.getInstance();
@@ -22,7 +35,7 @@ public class DependencyManager {
         final String mainMenuDisplayText = "1. Log in as a manager\n" +
                 "0. Exit";
         final Map<Integer, Action> mainMenuActionMap = new HashMap<>();
-        mainMenu = new MainMenu(mainMenuDisplayText, mainMenuActionMap);
+        mainMenu = new ContextMenuImpl(mainMenuDisplayText, mainMenuActionMap);
 
         Action backAction = new SwitchContextMenuAction(mainMenu);
         final Map<Integer, Action> managerMenuActionMap = new HashMap<>();
@@ -33,7 +46,7 @@ public class DependencyManager {
         final String managerMenuDisplayText = "1. Company list\n" +
                 "2. Create a company\n" +
                 "0. Back";
-        managerMenu = new ManagerMenu(managerMenuDisplayText, managerMenuActionMap);
+        managerMenu = new ContextMenuImpl(managerMenuDisplayText, managerMenuActionMap);
         Action managerLoginAction = new SwitchContextMenuAction(managerMenu);
         Action terminateAction = new TerminateAction();
         mainMenuActionMap.put(1, managerLoginAction);

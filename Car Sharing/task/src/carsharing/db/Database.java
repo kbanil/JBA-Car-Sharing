@@ -37,6 +37,13 @@ public class Database {
                     "ID INTEGER PRIMARY KEY AUTO_INCREMENT, " +
                     "NAME VARCHAR(30) UNIQUE NOT NULL )";
             statement.executeUpdate(COMPANY_DDL);
+            final String CAR_DDL = "CREATE TABLE IF NOT EXISTS " +
+                    "CAR (" +
+                    "ID INTEGER PRIMARY KEY AUTO_INCREMENT, " +
+                    "NAME VARCHAR(30) UNIQUE NOT NULL, " +
+                    "COMPANY_ID INTEGER NOT NULL , " +
+                    "CONSTRAINT fk_company FOREIGN KEY(COMPANY_ID) REFERENCES COMPANY(ID))";
+            statement.executeUpdate(CAR_DDL);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

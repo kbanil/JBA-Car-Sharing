@@ -1,17 +1,5 @@
 type: edu
 files:
-- name: src/carsharing/Main.java
-  visible: true
-  text: |-
-    package carsharing;
-
-    public class Main {
-
-        public static void main(String[] args) {
-            // write your code here
-        }
-    }
-  learner_created: false
 - name: test/DatabaseUtil.java
   visible: false
   text: |
@@ -555,44 +543,6 @@ files:
         }
     }
   learner_created: false
-- name: src/carsharing/db/CompanyRepository.java
-  visible: true
-  text: |
-    package carsharing.db;
-
-    import carsharing.Company;
-
-    import java.sql.SQLException;
-    import java.util.List;
-
-    public interface CompanyRepository {
-        void add(String companyName) throws SQLException;
-        List<Company> getAll() throws SQLException;
-    }
-  learner_created: true
-- name: src/carsharing/Company.java
-  visible: true
-  text: |
-    package carsharing;
-
-    public class Company {
-        private final int id;
-        private final String name;
-
-        public Company(int id, String name) {
-            this.id = id;
-            this.name = name;
-        }
-
-        public int getId() {
-            return id;
-        }
-
-        public String getName() {
-            return name;
-        }
-    }
-  learner_created: true
 - name: src/carsharing/tool/ContextMenu.java
   visible: true
   text: |
@@ -647,62 +597,6 @@ files:
         }
     }
   learner_created: true
-- name: src/carsharing/tool/ListCompanyAction.java
-  visible: true
-  text: |
-    package carsharing.tool;
-
-    import carsharing.Company;
-    import carsharing.CompanyService;
-
-    import java.util.List;
-
-    public class ListCompanyAction implements Action {
-        private final CompanyService companyService;
-
-        public ListCompanyAction(CompanyService companyService) {
-            this.companyService = companyService;
-        }
-
-        @Override
-        public void perform(DBMTool dbmTool) {
-            final List<Company> companies = companyService.getAll();
-            if (companies.isEmpty()) {
-                System.out.println("The company list is empty!");
-            } else {
-                System.out.println("Company list:");
-                for (int i = 1; i <= companies.size(); i++) {
-                    Company company = companies.get(i - 1);
-                    System.out.printf("%d. %s%n", i, company.getName());
-                }
-                System.out.println();
-            }
-        }
-    }
-  learner_created: true
-- name: src/carsharing/tool/Action.java
-  visible: true
-  text: |
-    package carsharing.tool;
-
-    public interface Action {
-        void perform(DBMTool dbmTool);
-    }
-  learner_created: true
-- name: src/carsharing/tool/MainMenu.java
-  visible: true
-  text: |
-    package carsharing.tool;
-
-    import java.util.Map;
-
-    public class MainMenu extends AbstractContextMenu implements ContextMenu{
-
-        public MainMenu(String displayText, Map<Integer, Action> actionMap) {
-            super(displayText,actionMap);
-        }
-    }
-  learner_created: true
 - name: src/carsharing/tool/SwitchContextMenuAction.java
   visible: true
   text: |
@@ -718,6 +612,54 @@ files:
         @Override
         public void perform(DBMTool dbmTool) {
             dbmTool.switchContext(nextContextMenu);
+        }
+    }
+  learner_created: true
+- name: src/carsharing/CompanyService.java
+  visible: true
+  text: |
+    package carsharing;
+
+    import java.util.List;
+
+    public interface CompanyService {
+        void add(String companyName);
+        List<Company> getAll();
+    }
+  learner_created: true
+- name: src/carsharing/CompanyServiceImpl.java
+  visible: true
+  text: |
+    package carsharing;
+
+    import carsharing.db.CompanyRepository;
+
+    import java.sql.SQLException;
+    import java.util.List;
+
+    public class CompanyServiceImpl implements CompanyService {
+        private final CompanyRepository companyRepository;
+
+        public CompanyServiceImpl(CompanyRepository companyRepository) {
+            this.companyRepository = companyRepository;
+        }
+
+        @Override
+        public void add(String companyName) {
+            try {
+                companyRepository.add(companyName);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public List<Company> getAll() {
+            try {
+                return companyRepository.getAll();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
   learner_created: true
@@ -770,6 +712,119 @@ files:
 
         public Connection getConnection() throws SQLException {
             return DriverManager.getConnection(DB_URL + dbFileName);
+        }
+    }
+  learner_created: true
+- name: src/carsharing/tool/Action.java
+  visible: true
+  text: |
+    package carsharing.tool;
+
+    public interface Action {
+        void perform(DBMTool dbmTool);
+    }
+  learner_created: true
+- name: src/carsharing/tool/ContextMenuImpl.java
+  visible: true
+  text: |
+    package carsharing.tool;
+
+    import java.util.Map;
+    import java.util.Scanner;
+
+    public abstract class AbstractContextMenu {
+        protected final String displayText;
+        protected final Map<Integer, Action> actionMap;
+        protected Action currentAction;
+
+        public AbstractContextMenu(String displayText, Map<Integer, Action> actionMap) {
+            this.displayText = displayText;
+            this.actionMap = actionMap;
+        }
+
+        public void display() {
+            System.out.println(displayText);
+        }
+
+        public void readInput() {
+            Scanner scanner = new Scanner(System.in);
+            final int actionCode = scanner.nextInt();
+            currentAction = actionMap.get(actionCode);
+        }
+
+        public void performAction(DBMTool dbmTool) {
+            currentAction.perform(dbmTool);
+        }
+    }
+  learner_created: true
+- name: src/carsharing/db/CompanyRepository.java
+  visible: true
+  text: |
+    package carsharing.db;
+
+    import carsharing.Company;
+
+    import java.sql.SQLException;
+    import java.util.List;
+
+    public interface CompanyRepository {
+        void add(String companyName) throws SQLException;
+        List<Company> getAll() throws SQLException;
+    }
+  learner_created: true
+- name: src/carsharing/Company.java
+  visible: true
+  text: |
+    package carsharing;
+
+    public class Company {
+        private final int id;
+        private final String name;
+
+        public Company(int id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
+  learner_created: true
+- name: src/carsharing/tool/ListCompanyAction.java
+  visible: true
+  text: |
+    package carsharing.tool;
+
+    import carsharing.Company;
+    import carsharing.CompanyService;
+
+    import java.util.List;
+
+    public class ListCompanyAction implements Action {
+        private final CompanyService companyService;
+
+        public ListCompanyAction(CompanyService companyService) {
+            this.companyService = companyService;
+        }
+
+        @Override
+        public void perform(DBMTool dbmTool) {
+            final List<Company> companies = companyService.getAll();
+            if (companies.isEmpty()) {
+                System.out.println("The company list is empty!");
+            } else {
+                System.out.println("Company list:");
+                for (int i = 1; i <= companies.size(); i++) {
+                    Company company = companies.get(i - 1);
+                    System.out.printf("%d. %s%n", i, company.getName());
+                }
+                System.out.println();
+            }
         }
     }
   learner_created: true
@@ -840,19 +895,18 @@ files:
         }
     }
   learner_created: true
-- name: src/carsharing/tool/ManagerMenu.java
+- name: src/carsharing/Main.java
   visible: true
-  text: |
-    package carsharing.tool;
+  text: |-
+    package carsharing;
 
-    import java.util.Map;
+    public class Main {
 
-    public class ManagerMenu extends AbstractContextMenu implements ContextMenu {
-        public ManagerMenu(String displayText, Map<Integer, Action> actionMap) {
-            super(displayText, actionMap);
+        public static void main(String[] args) {
+            // write your code here
         }
     }
-  learner_created: true
+  learner_created: false
 - name: src/carsharing/tool/CreateCompanyAction.java
   visible: true
   text: |
@@ -879,50 +933,8 @@ files:
         }
     }
   learner_created: true
-- name: src/carsharing/CompanyService.java
+- name: src/carsharing/Car.java
   visible: true
-  text: |
-    package carsharing;
-
-    import java.util.List;
-
-    public interface CompanyService {
-        void add(String companyName);
-        List<Company> getAll();
-    }
-  learner_created: true
-- name: src/carsharing/tool/AbstractContextMenu.java
-  visible: true
-  text: |
-    package carsharing.tool;
-
-    import java.util.Map;
-    import java.util.Scanner;
-
-    public abstract class AbstractContextMenu {
-        protected final String displayText;
-        protected final Map<Integer, Action> actionMap;
-        protected Action currentAction;
-
-        public AbstractContextMenu(String displayText, Map<Integer, Action> actionMap) {
-            this.displayText = displayText;
-            this.actionMap = actionMap;
-        }
-
-        public void display() {
-            System.out.println(displayText);
-        }
-
-        public void readInput() {
-            Scanner scanner = new Scanner(System.in);
-            final int actionCode = scanner.nextInt();
-            currentAction = actionMap.get(actionCode);
-        }
-
-        public void performAction(DBMTool dbmTool) {
-            currentAction.perform(dbmTool);
-        }
-    }
   learner_created: true
 - name: src/carsharing/db/JDBCCompanyRepository.java
   visible: true
@@ -978,42 +990,21 @@ files:
         }
     }
   learner_created: true
-- name: src/carsharing/CompanyServiceImpl.java
+- name: src/carsharing/tool/ListCarAction.java
   visible: true
-  text: |
-    package carsharing;
-
-    import carsharing.db.CompanyRepository;
-
-    import java.sql.SQLException;
-    import java.util.List;
-
-    public class CompanyServiceImpl implements CompanyService {
-        private final CompanyRepository companyRepository;
-
-        public CompanyServiceImpl(CompanyRepository companyRepository) {
-            this.companyRepository = companyRepository;
-        }
-
-        @Override
-        public void add(String companyName) {
-            try {
-                companyRepository.add(companyName);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        @Override
-        public List<Company> getAll() {
-            try {
-                return companyRepository.getAll();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
   learner_created: true
-feedback_link: https://hyperskill.org/projects/140/stages/760/implement#comment
-status: Unchecked
-record: -1
+- name: src/carsharing/tool/CreateCarAction.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/tool/ChooseCompanyAction.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/db/carsharing.mv.db
+  visible: true
+  learner_created: true
+feedback_link: https://hyperskill.org/learn/step/11503#comment
+status: Solved
+feedback:
+  message: Congratulations!
+  time: Fri, 22 Jul 2022 04:43:42 UTC
+record: 3

@@ -29,4 +29,22 @@ public class CompanyServiceImpl implements CompanyService {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public void addCar(Company company, String carName) {
+        try {
+            companyRepository.addCar(company, carName);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public List<Car> getAllCars(Company company) {
+        try {
+            return companyRepository.getAllCars(company);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
