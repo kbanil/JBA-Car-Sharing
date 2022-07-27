@@ -47,4 +47,13 @@ public class CompanyServiceImpl implements CompanyService {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public List<Car> getAllAvailableCars(Company company) {
+        try {
+            return companyRepository.getAllAvailableCars(company);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

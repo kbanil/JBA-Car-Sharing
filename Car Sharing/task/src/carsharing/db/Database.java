@@ -44,6 +44,13 @@ public class Database {
                     "COMPANY_ID INTEGER NOT NULL , " +
                     "CONSTRAINT fk_company FOREIGN KEY(COMPANY_ID) REFERENCES COMPANY(ID))";
             statement.executeUpdate(CAR_DDL);
+            final String CUSTOMER_DDL = "CREATE TABLE IF NOT EXISTS " +
+                    "CUSTOMER(" +
+                    "ID INTEGER PRIMARY KEY AUTO_INCREMENT, " +
+                    "NAME VARCHAR(30) UNIQUE NOT NULL, " +
+                    "RENTED_CAR_ID INTEGER default NULL, " +
+                    "CONSTRAINT fk_car FOREIGN KEY(RENTED_CAR_ID) REFERENCES CAR(ID))";
+            statement.executeUpdate(CUSTOMER_DDL);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

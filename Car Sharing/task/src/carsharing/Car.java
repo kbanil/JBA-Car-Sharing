@@ -3,10 +3,12 @@ package carsharing;
 public class Car {
     private final int id;
     private final String name;
+    private final Company company;
 
-    public Car(int id, String name) {
+    public Car(int id, String name, Company company) {
         this.id = id;
         this.name = name;
+        this.company = company;
     }
 
     public int getId() {
@@ -15,5 +17,9 @@ public class Car {
 
     public String getName() {
         return name;
+    }
+
+    public Company getCompany() {
+        return company;
     }
 }

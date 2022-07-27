@@ -1,18 +1,6 @@
 type: edu
 custom_name: Welcome, customer!
 files:
-- name: src/carsharing/Main.java
-  visible: true
-  text: |-
-    package carsharing;
-
-    public class Main {
-
-        public static void main(String[] args) {
-            // write your code here
-        }
-    }
-  learner_created: false
 - name: test/DatabaseUtil.java
   visible: false
   text: |
@@ -1114,65 +1102,6 @@ files:
         }
     }
   learner_created: true
-- name: src/carsharing/db/Database.java
-  visible: true
-  text: |
-    package carsharing.db;
-
-    import java.sql.Connection;
-    import java.sql.DriverManager;
-    import java.sql.SQLException;
-    import java.sql.Statement;
-
-    public class Database {
-        private static final String JDBC_DRIVER = "org.h2.Driver";
-        private static final String DB_URL = "jdbc:h2:./src/carsharing/db/";
-        private static Database INSTANCE;
-        private final String dbFileName;
-
-        private Database(String dbFileName) {
-            this.dbFileName = dbFileName;
-        }
-
-        public static Database getInstance(String dbFileName) {
-            if (INSTANCE == null) {
-                INSTANCE = new Database(dbFileName);
-            }
-            return INSTANCE;
-        }
-
-        public static Database getInstance() {
-            return INSTANCE;
-        }
-
-        public void initialize() throws ClassNotFoundException {
-            Class.forName(JDBC_DRIVER);
-            try (Connection connection =
-                         getConnection();
-                 Statement statement = connection.createStatement()) {
-                connection.setAutoCommit(true);
-                final String COMPANY_DDL = "CREATE TABLE IF NOT EXISTS " +
-                        "COMPANY(" +
-                        "ID INTEGER PRIMARY KEY AUTO_INCREMENT, " +
-                        "NAME VARCHAR(30) UNIQUE NOT NULL )";
-                statement.executeUpdate(COMPANY_DDL);
-                final String CAR_DDL = "CREATE TABLE IF NOT EXISTS " +
-                        "CAR (" +
-                        "ID INTEGER PRIMARY KEY AUTO_INCREMENT, " +
-                        "NAME VARCHAR(30) UNIQUE NOT NULL, " +
-                        "COMPANY_ID INTEGER NOT NULL , " +
-                        "CONSTRAINT fk_company FOREIGN KEY(COMPANY_ID) REFERENCES COMPANY(ID))";
-                statement.executeUpdate(CAR_DDL);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        public Connection getConnection() throws SQLException {
-            return DriverManager.getConnection(DB_URL + dbFileName);
-        }
-    }
-  learner_created: true
 - name: src/carsharing/DependencyManager.java
   visible: true
   text: |
@@ -1506,6 +1435,126 @@ files:
         }
     }
   learner_created: true
+- name: src/carsharing/Main.java
+  visible: true
+  text: |-
+    package carsharing;
+
+    public class Main {
+
+        public static void main(String[] args) {
+            // write your code here
+        }
+    }
+  learner_created: false
+- name: src/carsharing/db/Database.java
+  visible: true
+  text: |
+    package carsharing.db;
+
+    import java.sql.Connection;
+    import java.sql.DriverManager;
+    import java.sql.SQLException;
+    import java.sql.Statement;
+
+    public class Database {
+        private static final String JDBC_DRIVER = "org.h2.Driver";
+        private static final String DB_URL = "jdbc:h2:./src/carsharing/db/";
+        private static Database INSTANCE;
+        private final String dbFileName;
+
+        private Database(String dbFileName) {
+            this.dbFileName = dbFileName;
+        }
+
+        public static Database getInstance(String dbFileName) {
+            if (INSTANCE == null) {
+                INSTANCE = new Database(dbFileName);
+            }
+            return INSTANCE;
+        }
+
+        public static Database getInstance() {
+            return INSTANCE;
+        }
+
+        public void initialize() throws ClassNotFoundException {
+            Class.forName(JDBC_DRIVER);
+            try (Connection connection =
+                         getConnection();
+                 Statement statement = connection.createStatement()) {
+                connection.setAutoCommit(true);
+                final String COMPANY_DDL = "CREATE TABLE IF NOT EXISTS " +
+                        "COMPANY(" +
+                        "ID INTEGER PRIMARY KEY AUTO_INCREMENT, " +
+                        "NAME VARCHAR(30) UNIQUE NOT NULL )";
+                statement.executeUpdate(COMPANY_DDL);
+                final String CAR_DDL = "CREATE TABLE IF NOT EXISTS " +
+                        "CAR (" +
+                        "ID INTEGER PRIMARY KEY AUTO_INCREMENT, " +
+                        "NAME VARCHAR(30) UNIQUE NOT NULL, " +
+                        "COMPANY_ID INTEGER NOT NULL , " +
+                        "CONSTRAINT fk_company FOREIGN KEY(COMPANY_ID) REFERENCES COMPANY(ID))";
+                statement.executeUpdate(CAR_DDL);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        public Connection getConnection() throws SQLException {
+            return DriverManager.getConnection(DB_URL + dbFileName);
+        }
+    }
+  learner_created: true
+- name: src/carsharing/Customer.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/db/CustomerRepository.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/db/JDBCCustomerRepository.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/CustomerService.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/CustomerServiceImpl.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/tool/CreateCustomerAction.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/tool/ListCustomerAction.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/tool/ChooseCustomerAction.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/tool/ListCompanyForCustomerRentAction.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/db/CarRepository.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/db/JDBCCarRepository.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/tool/ListCarForCustomerRentAction.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/tool/RentCarAction.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/tool/ReturnCarAction.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/tool/MyRentedCarAction.java
+  visible: true
+  learner_created: true
 feedback_link: https://hyperskill.org/learn/step/11504#comment
-status: Unchecked
+status: Solved
+feedback:
+  message: Well done! You've finished the project. Select a new project on <a href="https://hyperskill.org/projects">JetBrains
+    Academy</a> to continue learning.
+  time: Wed, 27 Jul 2022 19:00:31 UTC
 record: 4

@@ -16,6 +16,8 @@ public class JDBCCompanyRepository implements CompanyRepository {
     private static final String QUERY_FIND_ALL_COMPANY = "SELECT * from COMPANY";
     private static final String INSERT_CAR_STATEMENT = "INSERT INTO CAR(NAME,COMPANY_ID) VALUES (?,?)";
     private static final String QUERY_FIND_ALL_CAR = "SELECT * FROM CAR WHERE COMPANY_ID = ? ORDER BY ID";
+    private static final String QUERY_FIND_ALL_AVAILABLE_CARS = "SELECT * FROM CAR c WHERE COMPANY_ID = ? AND NOT EXISTS(SELECT * from CUSTOMER cust where c.ID = cust.RENTED_CAR_ID) ORDER BY c.ID";
+    private static final String FIND_BY_ID = "SELECT * FROM COMPANY WHERE ID = ?";
     private final Database database;
 
     private JDBCCompanyRepository() {
@@ -67,14 +69,46 @@ public class JDBCCompanyRepository implements CompanyRepository {
         try (Connection connection = database.getConnection();
              final PreparedStatement statement = connection.prepareStatement(QUERY_FIND_ALL_CAR);
         ) {
-            statement.setInt(1,company.getId());
+            statement.setInt(1, company.getId());
             final ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 int id = resultSet.getInt("ID");
                 String name = resultSet.getString("NAME");
-                cars.add(new Car(id, name));
+                cars.add(new Car(id, name, company));
             }
         }
         return cars;
+    }
+
+    @Override
+    public List<Car> getAllAvailableCars(Company company) throws SQLException {
+        List<Car> cars = new ArrayList<>();
+        try (Connection connection = database.getConnection();
+             final PreparedStatement statement = connection.prepareStatement(QUERY_FIND_ALL_AVAILABLE_CARS);
+        ) {
+            statement.setInt(1, company.getId());
+            final ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                int id = resultSet.getInt("ID");
+                String name = resultSet.getString("NAME");
+                cars.add(new Car(id, name, company));
+            }
+        }
+        return cars;
+    }
+
+    @Override
+    public Company findById(int id) throws SQLException {
+        try (Connection connection = database.getConnection();
+             PreparedStatement statement = connection.prepareStatement(FIND_BY_ID)) {
+            statement.setInt(1, id);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                final int companyId = resultSet.getInt("ID");
+                final String name = resultSet.getString("NAME");
+                return new Company(companyId, name);
+            }
+        }
+        return null;
     }
 }

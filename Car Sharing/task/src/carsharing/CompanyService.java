@@ -10,4 +10,6 @@ public interface CompanyService {
     void addCar(Company company, String carName);
 
     List<Car> getAllCars(Company company);
+
+    List<Car> getAllAvailableCars(Company company);
 }
